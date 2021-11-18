@@ -2,6 +2,8 @@ defmodule Canvas.DrawingOperation do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @type t :: %__MODULE__{}
+
   schema "drawing_operations" do
     field :fill_char, :string
     field :height, :integer
@@ -19,13 +21,15 @@ defmodule Canvas.DrawingOperation do
   @doc false
   def changeset(drawing_operation, attrs) do
     drawing_operation
-    |> cast(attrs, [:operation, :x, :y, :width, :height, :fill_char, :outline_char])
+    |> cast(attrs, [:operation, :x, :y, :width, :height, :fill_char, :outline_char, :canvas_id])
     |> validate_required([:operation, :x, :y])
     |> validate_inclusion(:operation, ["Rectangle", "Flood fill"])
     |> validate_number(:x, greater_than_or_equal_to: 0)
     |> validate_number(:y, greater_than_or_equal_to: 0)
     |> validate_number(:width, greater_than: 0)
     |> validate_number(:height, greater_than: 0)
+    |> validate_length(:fill_char, max: 1)
+    |> validate_length(:outline_char, max: 1)
     |> validate_fill_and_outline()
     |> validate_width_and_height()
   end
