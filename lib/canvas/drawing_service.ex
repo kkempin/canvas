@@ -6,6 +6,15 @@ defmodule Canvas.DrawingService do
   alias Canvas.{DrawingOperation, Canvas, Repo}
 
   @doc """
+  Renders canvas
+  """
+  @spec render(pos_integer(), String.t()) :: String.t()
+  def render(canvas_id, join_with \\ "\n\r") do
+    canvas = Repo.get(Canvas, canvas_id)
+    Enum.join(canvas.content, join_with)
+  end
+
+  @doc """
   Draws given operation on the canvas.
   """
   @spec draw(pos_integer()) ::
@@ -65,6 +74,36 @@ defmodule Canvas.DrawingService do
     end)
   end
 
-  defp do_draw(%DrawingOperation{operation: "Flood fill"} = drawing_operation) do
+  defp do_draw(
+         %DrawingOperation{operation: "Flood fill", x: x, y: y, fill_char: fill_char} =
+           drawing_operation
+       ) do
+    canvas = drawing_operation.canvas
+
+    fill_canvas_around_point(canvas.content, canvas.width, canvas.height, x, y, fill_char)
+  end
+
+  defp fill_canvas_around_point(canvas, width, height, x, y, fill_char) do
+    if x == -1 or y == -1 or y == height or x == width do
+      canvas
+    else
+      row =
+        canvas
+        |> Enum.at(y)
+        |> String.split("", trim: true)
+
+      if Enum.at(row, x) == " " do
+        row = List.replace_at(row, x, fill_char)
+
+        canvas
+        |> List.replace_at(y, Enum.join(row, ""))
+        |> fill_canvas_around_point(width, height, x - 1, y, fill_char)
+        |> fill_canvas_around_point(width, height, x + 1, y, fill_char)
+        |> fill_canvas_around_point(width, height, x, y - 1, fill_char)
+        |> fill_canvas_around_point(width, height, x, y + 1, fill_char)
+      else
+        canvas
+      end
+    end
   end
 end

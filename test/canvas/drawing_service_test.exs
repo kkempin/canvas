@@ -189,6 +189,126 @@ defmodule Canvas.DrawingServiceTest do
     end
   end
 
+  describe "drawing Flood fill" do
+    setup do
+      canvas =
+        %Canvas{} |> Canvas.new_changeset(%{"width" => 10, "height" => 10}) |> Repo.insert!()
+
+      {:ok, canvas: canvas}
+    end
+
+    test "fills empty canvas", %{canvas: canvas} do
+      drawing_operation =
+        create_drawing_operations(canvas, %{
+          "x" => 0,
+          "y" => 0,
+          "fill_char" => "x",
+          "operation" => "Flood fill"
+        })
+
+      {:ok, canvas} = DrawingService.draw(drawing_operation.id)
+
+      assert canvas.content == [
+               "xxxxxxxxxx",
+               "xxxxxxxxxx",
+               "xxxxxxxxxx",
+               "xxxxxxxxxx",
+               "xxxxxxxxxx",
+               "xxxxxxxxxx",
+               "xxxxxxxxxx",
+               "xxxxxxxxxx",
+               "xxxxxxxxxx",
+               "xxxxxxxxxx"
+             ]
+    end
+
+    test "does not fill empty rectangle", %{canvas: canvas} do
+      canvas =
+        canvas
+        |> Canvas.update_changeset(%{
+          "content" => [
+            "          ",
+            " xxxx     ",
+            " x  x     ",
+            " x  x     ",
+            "xxxxxxxxxx",
+            "x        x",
+            "xxxxxxxxxx",
+            "          ",
+            "          ",
+            "          "
+          ]
+        })
+        |> Repo.update!()
+
+      drawing_operation =
+        create_drawing_operations(canvas, %{
+          "x" => 0,
+          "y" => 0,
+          "fill_char" => "-",
+          "operation" => "Flood fill"
+        })
+
+      {:ok, canvas} = DrawingService.draw(drawing_operation.id)
+
+      assert canvas.content == [
+               "----------",
+               "-xxxx-----",
+               "-x  x-----",
+               "-x  x-----",
+               "xxxxxxxxxx",
+               "x        x",
+               "xxxxxxxxxx",
+               "          ",
+               "          ",
+               "          "
+             ]
+    end
+
+    test "fills empty rectangle", %{canvas: canvas} do
+      canvas =
+        canvas
+        |> Canvas.update_changeset(%{
+          "content" => [
+            "          ",
+            " xxxxx    ",
+            " x   x    ",
+            " x   x    ",
+            " xxxxx    ",
+            "          ",
+            "          ",
+            "          ",
+            "          ",
+            "          "
+          ]
+        })
+        |> Repo.update!()
+
+      drawing_operation =
+        create_drawing_operations(canvas, %{
+          "x" => 3,
+          "y" => 3,
+          "fill_char" => "-",
+          "operation" => "Flood fill"
+        })
+
+      {:ok, canvas} = DrawingService.draw(drawing_operation.id)
+
+      assert canvas.content == [
+               "          ",
+               " xxxxx    ",
+               " x---x    ",
+               " x---x    ",
+               " xxxxx    ",
+               "          ",
+               "          ",
+               "          ",
+               "          ",
+               "          "
+             ]
+    end
+  end
+
   defp create_drawing_operations(canvas, attrs) do
     attrs = Map.merge(attrs, %{"canvas_id" => canvas.id})
 
