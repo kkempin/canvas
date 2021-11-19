@@ -3,6 +3,8 @@ defmodule Canvas.DrawingService do
   This module provides a service for drawing on a canvas.
   """
 
+  import Ecto.Query
+
   alias Canvas.{DrawingOperation, Canvas, Repo}
 
   @doc """
@@ -24,6 +26,8 @@ defmodule Canvas.DrawingService do
            Repo.get(DrawingOperation, drawing_operation_id),
          drawing_operation <- Repo.preload(drawing_operation, :canvas),
          content <- do_draw(drawing_operation),
+         {:ok, _drawing_operation} <-
+           update_drawing_operation(drawing_operation, %{"drawn_at" => DateTime.utc_now()}),
          {:ok, canvas} <- update_canvas(drawing_operation.canvas, %{"content" => content}) do
       CanvasWeb.Endpoint.broadcast("canvas:#{canvas.id}", "canvas_updated", %{
         content: render(canvas.id, "<br />")
@@ -35,9 +39,25 @@ defmodule Canvas.DrawingService do
     end
   end
 
+  @doc """
+  Process unprocessed drawing operations.
+  """
+  @spec process_drawing_operations() :: :ok
+  def process_drawing_operations() do
+    from(o in DrawingOperation, where: is_nil(o.drawn_at))
+    |> Repo.all()
+    |> Enum.each(&draw(&1.id))
+  end
+
   defp update_canvas(canvas, attrs) do
     canvas
     |> Canvas.update_changeset(attrs)
+    |> Repo.update()
+  end
+
+  defp update_drawing_operation(drawing_operation, attrs) do
+    drawing_operation
+    |> DrawingOperation.changeset(attrs)
     |> Repo.update()
   end
 

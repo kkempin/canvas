@@ -309,6 +309,52 @@ defmodule Canvas.DrawingServiceTest do
     end
   end
 
+  describe "process unprocess drawing operations" do
+    setup do
+      canvas =
+        %Canvas{} |> Canvas.new_changeset(%{"width" => 10, "height" => 10}) |> Repo.insert!()
+
+      {:ok, canvas: canvas}
+    end
+
+    test "processes drawing operations without drawn_at date", %{canvas: canvas} do
+      drawing_operation =
+        create_drawing_operations(canvas, %{
+          "x" => 1,
+          "y" => 1,
+          "width" => 3,
+          "height" => 3,
+          "fill_char" => "x",
+          "operation" => "Rectangle"
+        })
+
+      :ok = DrawingService.process_drawing_operations()
+
+      drawing_operation = Repo.get(DrawingOperation, drawing_operation.id)
+
+      refute is_nil(drawing_operation.drawn_at)
+    end
+
+    test "does not processes drawing operations with drawn_at date", %{canvas: canvas} do
+      drawing_operation =
+        create_drawing_operations(canvas, %{
+          "x" => 1,
+          "y" => 1,
+          "width" => 3,
+          "height" => 3,
+          "fill_char" => "x",
+          "operation" => "Rectangle",
+          "drawn_at" => "2021-11-19 12:00:00"
+        })
+
+      :ok = DrawingService.process_drawing_operations()
+
+      drawing_operation = Repo.get(DrawingOperation, drawing_operation.id)
+
+      assert drawing_operation.drawn_at == ~U[2021-11-19 12:00:00Z]
+    end
+  end
+
   defp create_drawing_operations(canvas, attrs) do
     attrs = Map.merge(attrs, %{"canvas_id" => canvas.id})
 

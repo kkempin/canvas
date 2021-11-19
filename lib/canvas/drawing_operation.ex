@@ -12,6 +12,7 @@ defmodule Canvas.DrawingOperation do
     field :width, :integer
     field :x, :integer
     field :y, :integer
+    field :drawn_at, :utc_datetime
 
     belongs_to :canvas, Canvas.Canvas
 
@@ -21,7 +22,17 @@ defmodule Canvas.DrawingOperation do
   @doc false
   def changeset(drawing_operation, attrs) do
     drawing_operation
-    |> cast(attrs, [:operation, :x, :y, :width, :height, :fill_char, :outline_char, :canvas_id])
+    |> cast(attrs, [
+      :operation,
+      :x,
+      :y,
+      :width,
+      :height,
+      :fill_char,
+      :outline_char,
+      :canvas_id,
+      :drawn_at
+    ])
     |> validate_required([:operation, :x, :y])
     |> validate_inclusion(:operation, ["Rectangle", "Flood fill"])
     |> validate_number(:x, greater_than_or_equal_to: 0)
