@@ -12,4 +12,12 @@ defmodule CanvasWeb.CanvasController do
       |> render("canvas.json", canvas: canvas)
     end
   end
+
+  def create(conn, _params) do
+    with {:ok, %Canvas{} = canvas} <- CanvasService.create_canvas(%{}) do
+      conn
+      |> put_status(:created)
+      |> render("canvas.json", canvas: canvas)
+    end
+  end
 end
