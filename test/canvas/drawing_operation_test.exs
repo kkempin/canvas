@@ -85,7 +85,8 @@ defmodule Canvas.DrawingOperationTest do
           "y" => "20",
           "width" => "4",
           "height" => "4",
-          "fill_char" => "*"
+          "fill_char" => "*",
+          "canvas_id" => 1
         })
 
       assert rectangle_changeset.valid?
@@ -97,7 +98,8 @@ defmodule Canvas.DrawingOperationTest do
           "operation" => "Flood fill",
           "x" => "10",
           "y" => "20",
-          "fill_char" => "*"
+          "fill_char" => "*",
+          "canvas_id" => 1
         })
 
       assert fill_changeset.valid?

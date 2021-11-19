@@ -1,7 +1,7 @@
 defmodule Canvas.CanvasServiceTest do
   use Canvas.DataCase
 
-  alias Canvas.{Canvas, CanvasService}
+  alias Canvas.CanvasService
 
   describe "creating" do
     test "creates a canvas" do

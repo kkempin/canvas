@@ -41,6 +41,17 @@ defmodule Canvas.DrawingService do
     |> Enum.each(&draw(&1.id))
   end
 
+  @doc """
+  Creates a new drawing_operation
+  """
+  @spec create_drawing_operation(map()) ::
+          {:ok, DrawingOperation.t()} | {:error, Ecto.Changeset.t()}
+  def create_drawing_operation(params) do
+    %DrawingOperation{}
+    |> DrawingOperation.changeset(params)
+    |> Repo.insert()
+  end
+
   defp update_drawing_operation(drawing_operation, attrs) do
     drawing_operation
     |> DrawingOperation.changeset(attrs)

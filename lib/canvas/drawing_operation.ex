@@ -33,7 +33,7 @@ defmodule Canvas.DrawingOperation do
       :canvas_id,
       :drawn_at
     ])
-    |> validate_required([:operation, :x, :y])
+    |> validate_required([:operation, :x, :y, :canvas_id])
     |> validate_inclusion(:operation, ["Rectangle", "Flood fill"])
     |> validate_number(:x, greater_than_or_equal_to: 0)
     |> validate_number(:y, greater_than_or_equal_to: 0)

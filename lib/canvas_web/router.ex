@@ -24,5 +24,6 @@ defmodule CanvasWeb.Router do
     pipe_through :api
 
     post "/canvas", CanvasController, :create
+    post "/draw", DrawingOperationController, :create
   end
 end
