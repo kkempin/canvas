@@ -20,8 +20,9 @@ defmodule CanvasWeb.Router do
     get "/", PageController, :index
   end
 
-  # Other scopes may use custom stacks.
-  # scope "/api", CanvasWeb do
-  #   pipe_through :api
-  # end
+  scope "/", CanvasWeb do
+    pipe_through :api
+
+    post "/canvas", CanvasController, :create
+  end
 end

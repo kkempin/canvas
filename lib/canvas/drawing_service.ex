@@ -1,20 +1,11 @@
 defmodule Canvas.DrawingService do
   @moduledoc """
-  This module provides a service for drawing on a canvas.
+  This module provides a service for drawing operations.
   """
 
   import Ecto.Query
 
-  alias Canvas.{DrawingOperation, Canvas, Repo}
-
-  @doc """
-  Renders canvas
-  """
-  @spec render(pos_integer(), String.t()) :: String.t()
-  def render(canvas_id, join_with \\ "\n\r") do
-    canvas = Repo.get(Canvas, canvas_id)
-    Enum.join(canvas.content, join_with)
-  end
+  alias Canvas.{DrawingOperation, Canvas, CanvasService, Repo}
 
   @doc """
   Draws given operation on the canvas.
@@ -28,9 +19,10 @@ defmodule Canvas.DrawingService do
          content <- do_draw(drawing_operation),
          {:ok, _drawing_operation} <-
            update_drawing_operation(drawing_operation, %{"drawn_at" => DateTime.utc_now()}),
-         {:ok, canvas} <- update_canvas(drawing_operation.canvas, %{"content" => content}) do
+         {:ok, canvas} <-
+           CanvasService.update_canvas(drawing_operation.canvas, %{"content" => content}) do
       CanvasWeb.Endpoint.broadcast("canvas:#{canvas.id}", "canvas_updated", %{
-        content: render(canvas.id, "<br />")
+        content: CanvasService.render(canvas.id, "<br />")
       })
 
       {:ok, canvas}
@@ -47,12 +39,6 @@ defmodule Canvas.DrawingService do
     from(o in DrawingOperation, where: is_nil(o.drawn_at))
     |> Repo.all()
     |> Enum.each(&draw(&1.id))
-  end
-
-  defp update_canvas(canvas, attrs) do
-    canvas
-    |> Canvas.update_changeset(attrs)
-    |> Repo.update()
   end
 
   defp update_drawing_operation(drawing_operation, attrs) do
