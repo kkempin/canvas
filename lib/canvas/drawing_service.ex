@@ -23,13 +23,22 @@ defmodule Canvas.DrawingService do
     with drawing_operation when not is_nil(drawing_operation) <-
            Repo.get(DrawingOperation, drawing_operation_id),
          drawing_operation <- Repo.preload(drawing_operation, :canvas),
-         content <- do_draw(drawing_operation) do
-      drawing_operation.canvas
-      |> Canvas.update_changeset(%{"content" => content})
-      |> Repo.update()
+         content <- do_draw(drawing_operation),
+         {:ok, canvas} <- update_canvas(drawing_operation.canvas, %{"content" => content}) do
+      CanvasWeb.Endpoint.broadcast("canvas:#{canvas.id}", "canvas_updated", %{
+        content: render(canvas.id, "<br />")
+      })
+
+      {:ok, canvas}
     else
       nil -> {:error, :operation_not_found}
     end
+  end
+
+  defp update_canvas(canvas, attrs) do
+    canvas
+    |> Canvas.update_changeset(attrs)
+    |> Repo.update()
   end
 
   defp do_draw(
