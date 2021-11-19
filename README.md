@@ -1,6 +1,6 @@
 # Canvas
 
-![Canvas](https://github.com/kkempin/canvas/blob/master/assets/canvas.png)
+![Canvas](https://github.com/kkempin/canvas/blob/main/assets/canvas.png)
 
 ## The Canvas project
 
