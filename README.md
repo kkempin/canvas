@@ -100,4 +100,4 @@ Once API endpoints to draw rectangles or fill shapes are invoked you will observ
 
 ## Author
 
-Krzysztof Kempiński
+Copyright, Krzysztof Kempiński
